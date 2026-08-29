@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ApiError } from '../lib/api';
-import type { Application } from '../lib/types';
-import { listApplications } from './applicationsApi';
+import type { Application, Pagination } from '../lib/types';
+import { listApplications, type ListApplicationsParams } from './applicationsApi';
 
 type Status = 'loading' | 'error' | 'success';
 
 interface UseApplications {
   applications: Application[];
+  pagination: Pagination | null;
   status: Status;
   error: string | null;
   reload: () => void;
@@ -14,12 +15,16 @@ interface UseApplications {
 
 /**
  * Hand-rolled fetch of `GET /applications` (no TanStack Query — see
- * docs/ROADMAP.md). One `useEffect` does the request; `reload()` flips back to
- * `loading` and bumps a nonce to re-run it. Setting state in `reload` (an event
+ * docs/ROADMAP.md). The effect re-runs whenever a param changes or `reload()`
+ * bumps the nonce; params are destructured to primitives so the dependency
+ * array is stable across parent re-renders. Setting state in `reload` (an event
  * callback) rather than the effect body keeps clear of `set-state-in-effect`.
  */
-export function useApplications(): UseApplications {
+export function useApplications(params: ListApplicationsParams = {}): UseApplications {
+  const { status: statusFilter, company, sortBy, sortOrder, page, pageSize } = params;
+
   const [applications, setApplications] = useState<Application[]>([]);
+  const [pagination, setPagination] = useState<Pagination | null>(null);
   const [status, setStatus] = useState<Status>('loading');
   const [error, setError] = useState<string | null>(null);
   const [nonce, setNonce] = useState(0);
@@ -32,11 +37,20 @@ export function useApplications(): UseApplications {
 
   useEffect(() => {
     let cancelled = false;
+    const query: ListApplicationsParams = {
+      status: statusFilter,
+      company,
+      sortBy,
+      sortOrder,
+      page,
+      pageSize,
+    };
 
-    listApplications()
+    listApplications(query)
       .then((list) => {
         if (cancelled) return;
         setApplications(list.data);
+        setPagination(list.pagination);
         setStatus('success');
       })
       .catch((cause: unknown) => {
@@ -48,7 +62,7 @@ export function useApplications(): UseApplications {
     return () => {
       cancelled = true;
     };
-  }, [nonce]);
+  }, [statusFilter, company, sortBy, sortOrder, page, pageSize, nonce]);
 
-  return { applications, status, error, reload };
+  return { applications, pagination, status, error, reload };
 }

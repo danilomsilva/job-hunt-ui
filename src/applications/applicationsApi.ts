@@ -1,14 +1,18 @@
 import { apiFetch } from '../lib/api';
 import type { ApplicationList, ApplicationSort, ApplicationStatus, SortOrder } from '../lib/types';
 
-/** Query params for `GET /applications` — all optional, see job-hunt-api's `listQuerySchema`. */
+/**
+ * Query params for `GET /applications` — all optional, see job-hunt-api's
+ * `listQuerySchema`. Fields are `| undefined` (not just `?`) so callers can pass
+ * a fully-shaped object with unset values, under `exactOptionalPropertyTypes`.
+ */
 export interface ListApplicationsParams {
-  status?: ApplicationStatus;
-  company?: string;
-  sortBy?: ApplicationSort;
-  sortOrder?: SortOrder;
-  page?: number;
-  pageSize?: number;
+  status?: ApplicationStatus | undefined;
+  company?: string | undefined;
+  sortBy?: ApplicationSort | undefined;
+  sortOrder?: SortOrder | undefined;
+  page?: number | undefined;
+  pageSize?: number | undefined;
 }
 
 function toQueryString(params: ListApplicationsParams): string {
