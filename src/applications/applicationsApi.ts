@@ -1,5 +1,11 @@
 import { apiFetch } from '../lib/api';
-import type { ApplicationList, ApplicationSort, ApplicationStatus, SortOrder } from '../lib/types';
+import type {
+  Application,
+  ApplicationList,
+  ApplicationSort,
+  ApplicationStatus,
+  SortOrder,
+} from '../lib/types';
 
 /**
  * Query params for `GET /applications` — all optional, see job-hunt-api's
@@ -34,4 +40,38 @@ function toQueryString(params: ListApplicationsParams): string {
 export function listApplications(params: ListApplicationsParams = {}): Promise<ApplicationList> {
   const query = toQueryString(params);
   return apiFetch<ApplicationList>(`/applications${query ? `?${query}` : ''}`);
+}
+
+/**
+ * The write shape for `POST` / `PATCH /applications` — what the form produces
+ * once validated. Every field is sent on both create and update (a full payload
+ * each time, no dirty-diffing); an empty optional field goes as `null`.
+ */
+export interface ApplicationPayload {
+  company: string;
+  role: string;
+  status: ApplicationStatus;
+  location: string | null;
+  jobUrl: string | null;
+  salaryMin: number | null;
+  salaryMax: number | null;
+  salaryCurrency: string | null;
+  notes: string | null;
+  appliedAt: string | null;
+}
+
+export function getApplication(id: string): Promise<Application> {
+  return apiFetch<Application>(`/applications/${id}`);
+}
+
+export function createApplication(payload: ApplicationPayload): Promise<Application> {
+  return apiFetch<Application>('/applications', { method: 'POST', body: payload });
+}
+
+export function updateApplication(id: string, payload: ApplicationPayload): Promise<Application> {
+  return apiFetch<Application>(`/applications/${id}`, { method: 'PATCH', body: payload });
+}
+
+export async function deleteApplication(id: string): Promise<void> {
+  await apiFetch<undefined>(`/applications/${id}`, { method: 'DELETE' });
 }

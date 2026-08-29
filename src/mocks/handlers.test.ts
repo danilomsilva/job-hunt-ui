@@ -124,4 +124,87 @@ describe('mock applications API', () => {
     expect(body.data.map((a) => a.company)).toEqual(['Initech', 'Umbrella']);
     expect(body.pagination).toMatchObject({ page: 2, pageSize: 2, total: 4, totalPages: 2 });
   });
+
+  const validPayload = {
+    company: 'Wayne Enterprises',
+    role: 'Security Engineer',
+    status: 'applied' as const,
+    location: 'Gotham',
+    jobUrl: 'https://wayne.example/jobs/1',
+    salaryMin: 100000,
+    salaryMax: 150000,
+    salaryCurrency: 'USD',
+    notes: 'Applied via referral',
+    appliedAt: '2026-08-15',
+  };
+
+  async function authed(method: string, path: string, body?: unknown): Promise<Response> {
+    const accessToken = await loginAsSeedUser();
+    const headers: Record<string, string> = { Authorization: `Bearer ${accessToken}` };
+    const init: RequestInit = { method, headers };
+    if (body !== undefined) {
+      headers['Content-Type'] = 'application/json';
+      init.body = JSON.stringify(body);
+    }
+    return fetch(`${API_URL}${path}`, init);
+  }
+
+  async function createOne(): Promise<{ id: string; updatedAt: string }> {
+    const res = await authed('POST', '/applications', validPayload);
+    expect(res.status).toBe(201);
+    return (await res.json()) as { id: string; updatedAt: string };
+  }
+
+  it('creates an application, normalises appliedAt, and lists it', async () => {
+    const res = await authed('POST', '/applications', validPayload);
+    expect(res.status).toBe(201);
+    const created = (await res.json()) as { company: string; appliedAt: string };
+    expect(created.company).toBe('Wayne Enterprises');
+    expect(created.appliedAt).toBe('2026-08-15T00:00:00.000Z');
+
+    const listed = await list('');
+    expect(listed.data.map((a) => a.company)).toContain('Wayne Enterprises');
+  });
+
+  it('rejects a create with salaryMin greater than salaryMax', async () => {
+    const res = await authed('POST', '/applications', {
+      ...validPayload,
+      salaryMin: 200000,
+      salaryMax: 100000,
+    });
+    expect(res.status).toBe(400);
+    expect((await res.json()) as { error: { code: string } }).toMatchObject({
+      error: { code: 'VALIDATION_ERROR' },
+    });
+  });
+
+  it('fetches one application by id', async () => {
+    const { id } = await createOne();
+    const res = await authed('GET', `/applications/${id}`);
+    expect(res.status).toBe(200);
+    expect((await res.json()) as { id: string }).toMatchObject({ id });
+  });
+
+  it('404s get / patch / delete for an unknown id', async () => {
+    const unknown = '00000000-0000-0000-0000-000000000000';
+    expect((await authed('GET', `/applications/${unknown}`)).status).toBe(404);
+    expect((await authed('PATCH', `/applications/${unknown}`, validPayload)).status).toBe(404);
+    expect((await authed('DELETE', `/applications/${unknown}`)).status).toBe(404);
+  });
+
+  it('patches a field, leaving the rest intact', async () => {
+    const { id } = await createOne();
+    const res = await authed('PATCH', `/applications/${id}`, { ...validPayload, status: 'offer' });
+    expect(res.status).toBe(200);
+    expect((await res.json()) as { status: string; company: string }).toMatchObject({
+      status: 'offer',
+      company: 'Wayne Enterprises',
+    });
+  });
+
+  it('deletes an application', async () => {
+    const { id } = await createOne();
+    expect((await authed('DELETE', `/applications/${id}`)).status).toBe(204);
+    expect((await authed('GET', `/applications/${id}`)).status).toBe(404);
+  });
 });

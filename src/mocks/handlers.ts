@@ -2,7 +2,8 @@
  * MSW handlers that stand in for job-hunt-api during tests. Behaviour is kept
  * faithful to its `src/routes/auth.ts` and `src/routes/applications.ts`:
  * unique-email conflict on register, one opaque "invalid email or password" on
- * login, refresh-token rotation, a bearer-guarded applications list, and the
+ * login, refresh-token rotation, bearer-guarded applications CRUD (a shared
+ * "Application not found" for a missing / not-owned / malformed id), and the
  * shared `{ error: { code, message, details? }, requestId }` error body.
  */
 import { http, HttpResponse } from 'msw';
@@ -32,6 +33,16 @@ function validationError(error: z.ZodError) {
     errorBody('VALIDATION_ERROR', 'The request payload failed validation', z.treeifyError(error)),
     { status: 400 },
   );
+}
+
+function unauthorized() {
+  return HttpResponse.json(errorBody('UNAUTHORIZED', 'Invalid or expired access token'), {
+    status: 401,
+  });
+}
+
+function applicationNotFound() {
+  return HttpResponse.json(errorBody('NOT_FOUND', 'Application not found'), { status: 404 });
 }
 
 function makeAccessToken(userId: string): string {
@@ -101,6 +112,53 @@ function compareBy(a: Application, b: Application, sortBy: ApplicationSort): num
   if (left === null) return 1; // nulls last
   if (right === null) return -1;
   return left < right ? -1 : 1;
+}
+
+function findOwnedApplication(id: string, userId: string): Application | undefined {
+  return db.applications.find((a) => a.id === id && a.userId === userId);
+}
+
+// Mirrors job-hunt-api's `applicationFields` + the `salaryMin <= salaryMax`
+// refinement. The client always sends every field, so keys are required here
+// (`.nullable()`, not `.nullish()`); PATCH takes the `.partial()` form.
+const applicationFieldsSchema = z.object({
+  company: z.string().min(1),
+  role: z.string().min(1),
+  status: z.enum([
+    'wishlist',
+    'applied',
+    'phone_screen',
+    'interview',
+    'offer',
+    'rejected',
+    'accepted',
+  ]),
+  location: z.string().min(1).nullable(),
+  jobUrl: z.url().nullable(),
+  salaryMin: z.number().int().nonnegative().nullable(),
+  salaryMax: z.number().int().nonnegative().nullable(),
+  salaryCurrency: z.string().length(3).nullable(),
+  notes: z.string().nullable(),
+  appliedAt: z.string().nullable(),
+});
+
+const salaryRangeOk = (v: {
+  salaryMin?: number | null | undefined;
+  salaryMax?: number | null | undefined;
+}): boolean => v.salaryMin == null || v.salaryMax == null || v.salaryMin <= v.salaryMax;
+const salaryRangeIssue = {
+  message: 'salaryMin must not be greater than salaryMax',
+  path: ['salaryMin'],
+};
+
+const createPayloadSchema = applicationFieldsSchema.refine(salaryRangeOk, salaryRangeIssue);
+const updatePayloadSchema = applicationFieldsSchema
+  .partial()
+  .refine(salaryRangeOk, salaryRangeIssue);
+
+function isoOrNull(value: string | null | undefined): string | null | undefined {
+  if (typeof value !== 'string') return value;
+  return new Date(value).toISOString();
 }
 
 function issueTokenPair(user: MockUser) {
@@ -189,11 +247,7 @@ export const handlers = [
 
   http.get(`${API_URL}/applications`, ({ request }) => {
     const userId = userIdFromAuthHeader(request);
-    if (userId === undefined) {
-      return HttpResponse.json(errorBody('UNAUTHORIZED', 'Invalid or expired access token'), {
-        status: 401,
-      });
-    }
+    if (userId === undefined) return unauthorized();
 
     const query = parseListQuery(request.url);
     let rows = db.applications.filter((application) => application.userId === userId);
@@ -222,5 +276,60 @@ export const handlers = [
         totalPages: Math.ceil(total / query.pageSize) || 1,
       },
     });
+  }),
+
+  http.post(`${API_URL}/applications`, async ({ request }) => {
+    const userId = userIdFromAuthHeader(request);
+    if (userId === undefined) return unauthorized();
+
+    const parsed = createPayloadSchema.safeParse(await request.json());
+    if (!parsed.success) return validationError(parsed.error);
+
+    const now = new Date().toISOString();
+    const application: Application = {
+      ...parsed.data,
+      id: crypto.randomUUID(),
+      userId,
+      appliedAt: isoOrNull(parsed.data.appliedAt) ?? null,
+      createdAt: now,
+      updatedAt: now,
+    };
+    db.applications.push(application);
+    return HttpResponse.json(application, { status: 201 });
+  }),
+
+  http.get(`${API_URL}/applications/:id`, ({ request, params }) => {
+    const userId = userIdFromAuthHeader(request);
+    if (userId === undefined) return unauthorized();
+
+    const application = findOwnedApplication(String(params.id), userId);
+    return application ? HttpResponse.json(application) : applicationNotFound();
+  }),
+
+  http.patch(`${API_URL}/applications/:id`, async ({ request, params }) => {
+    const userId = userIdFromAuthHeader(request);
+    if (userId === undefined) return unauthorized();
+
+    const existing = findOwnedApplication(String(params.id), userId);
+    if (!existing) return applicationNotFound();
+
+    const parsed = updatePayloadSchema.safeParse(await request.json());
+    if (!parsed.success) return validationError(parsed.error);
+
+    const patch = { ...parsed.data };
+    if (patch.appliedAt !== undefined) patch.appliedAt = isoOrNull(patch.appliedAt) ?? null;
+    Object.assign(existing, patch, { updatedAt: new Date().toISOString() });
+    return HttpResponse.json(existing);
+  }),
+
+  http.delete(`${API_URL}/applications/:id`, ({ request, params }) => {
+    const userId = userIdFromAuthHeader(request);
+    if (userId === undefined) return unauthorized();
+
+    const existing = findOwnedApplication(String(params.id), userId);
+    if (!existing) return applicationNotFound();
+
+    db.applications = db.applications.filter((a) => a.id !== existing.id);
+    return new HttpResponse(null, { status: 204 });
   }),
 ];
