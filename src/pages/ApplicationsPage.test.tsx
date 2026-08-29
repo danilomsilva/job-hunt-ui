@@ -27,9 +27,9 @@ function emptyList() {
   });
 }
 
-function renderPage() {
+function renderPage(initialEntry = '/applications') {
   return render(
-    <MemoryRouter>
+    <MemoryRouter initialEntries={[initialEntry]}>
       <AuthProvider>
         <ApplicationsPage />
       </AuthProvider>
@@ -78,5 +78,35 @@ describe('ApplicationsPage', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Try again' }));
 
     expect(await screen.findByText('No applications yet.')).toBeInTheDocument();
+  });
+
+  it('narrows the rows from a status param in the URL', async () => {
+    await seedSession();
+    renderPage('/applications?status=interview');
+
+    expect(await screen.findByText('Globex')).toBeInTheDocument();
+    expect(screen.queryByText('Initech')).not.toBeInTheDocument();
+    expect(screen.getAllByRole('row')).toHaveLength(2); // header + one match
+  });
+
+  it('shows the filtered empty copy when a filter matches nothing', async () => {
+    await seedSession();
+    renderPage('/applications?company=nomatchxyz');
+
+    expect(await screen.findByText('No applications match these filters.')).toBeInTheDocument();
+  });
+
+  it('pages through the list', async () => {
+    await seedSession();
+    renderPage('/applications?pageSize=2&sortBy=company&sortOrder=asc');
+
+    expect(await screen.findByText('Globex')).toBeInTheDocument();
+    expect(screen.getByText('Page 1 of 2')).toBeInTheDocument();
+    expect(screen.queryByText('Umbrella')).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Next' }));
+
+    expect(await screen.findByText('Umbrella')).toBeInTheDocument();
+    expect(screen.getByText('Page 2 of 2')).toBeInTheDocument();
   });
 });
