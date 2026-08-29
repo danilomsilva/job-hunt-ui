@@ -62,13 +62,17 @@ describe('ApplicationsPage', () => {
     );
   });
 
-  it('shows an empty state when there are none', async () => {
+  it('shows a first-run empty state with a call to action', async () => {
     await seedSession();
     server.use(http.get(`${API_URL}/applications`, () => emptyList()));
 
     renderPage();
 
     expect(await screen.findByText('No applications yet.')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Add your first application' })).toHaveAttribute(
+      'href',
+      '/applications/new',
+    );
   });
 
   it('shows an error with a working retry', async () => {
@@ -103,11 +107,14 @@ describe('ApplicationsPage', () => {
     expect(screen.getAllByRole('row')).toHaveLength(2); // header + one match
   });
 
-  it('shows the filtered empty copy when a filter matches nothing', async () => {
+  it('shows the filtered empty copy (no CTA) when a filter matches nothing', async () => {
     await seedSession();
     renderPage('/applications?company=nomatchxyz');
 
     expect(await screen.findByText('No applications match these filters.')).toBeInTheDocument();
+    expect(
+      screen.queryByRole('link', { name: 'Add your first application' }),
+    ).not.toBeInTheDocument();
   });
 
   it('pages through the list', async () => {

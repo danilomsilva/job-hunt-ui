@@ -50,10 +50,20 @@ export function ApplicationsPage() {
         </div>
       )}
 
-      {status === 'success' && applications.length === 0 && (
-        <p className="mt-4 text-sm text-slate-500">
-          {filtersActive ? 'No applications match these filters.' : 'No applications yet.'}
-        </p>
+      {status === 'success' && applications.length === 0 && filtersActive && (
+        <p className="mt-4 text-sm text-slate-500">No applications match these filters.</p>
+      )}
+
+      {status === 'success' && applications.length === 0 && !filtersActive && (
+        <div className="mt-4 text-sm text-slate-500">
+          <p>No applications yet.</p>
+          <Link
+            to="/applications/new"
+            className="mt-1 inline-block font-medium text-slate-900 underline"
+          >
+            Add your first application
+          </Link>
+        </div>
       )}
 
       {status === 'success' && applications.length > 0 && (
