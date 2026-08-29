@@ -12,20 +12,29 @@ Phase 1's — learn the fundamentals properly, not ship fast with shortcuts.
 - **Build tool:** Vite — fast dev server, native TypeScript, no bundler config
 - **Framework:** React 19, TypeScript (strict mode)
 - **Routing:** React Router — the standard client-side router for a React SPA
-- **Server state:** TanStack Query — caching, refetching, loading/error states
-  for data from `job-hunt-api`, instead of hand-rolled `useEffect` fetching
-- **Forms & validation:** React Hook Form + Zod (`@hookform/resolvers`) — same
-  validation library the backend already uses
+- **Server state:** hand-rolled — `useState` + `useEffect` + `fetch`, loading and
+  error state handled explicitly per call. No TanStack Query: the fetching,
+  caching, and refetch mechanics are part of what this project exists to learn.
+- **Forms:** controlled components with React state — no React Hook Form.
+- **Validation:** Zod, called directly (`schema.safeParse`) — the same library the
+  backend uses. The one form/data framework deliberately kept.
 - **Styling:** Tailwind CSS
 - **Testing:** Vitest + React Testing Library
 - **Linting:** ESLint + Prettier
 
-One decision deliberately deferred to the Auth stage, not made upfront: where
-access/refresh tokens are stored client-side (`localStorage` vs. in-memory
-only). The backend returns both in the JSON response body today, not
-`httpOnly` cookies, so the real trade-off (XSS exposure vs. losing the
-session on every page refresh) is worth deciding once the auth flow is
-actually being built, not guessed at now.
+One decision was deliberately deferred to the Auth stage, not made upfront:
+where access/refresh tokens are stored client-side. The backend returns both
+in the JSON response body, not `httpOnly` cookies, so the trade-off is real —
+XSS exposure vs. losing the session on every page refresh.
+
+**Decided (Stage 2): a hybrid store.** The access token lives in memory only
+(a module variable / context, never persisted), so an injected script can't
+read it back from storage and it dies with the tab. The refresh token goes in
+`localStorage`, so the session survives a reload: on app mount the client
+calls `POST /auth/refresh` with it to mint a fresh access token. Refresh
+tokens rotate on every use, so a stale copy in `localStorage` is single-use
+and self-limiting if it leaks. Full in-memory-only was rejected — logging out
+on every reload is the wrong feel for a tracker left open in a tab.
 
 ---
 
