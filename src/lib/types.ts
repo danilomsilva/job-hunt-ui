@@ -24,3 +24,36 @@ export interface ApiErrorBody {
   };
   requestId: string;
 }
+
+/** The hiring-pipeline stages, in order (job-hunt-api's `application_status` enum). */
+export type ApplicationStatus =
+  'wishlist' | 'applied' | 'phone_screen' | 'interview' | 'offer' | 'rejected' | 'accepted';
+
+export interface Application {
+  id: string;
+  userId: string;
+  company: string;
+  role: string;
+  status: ApplicationStatus;
+  location: string | null;
+  jobUrl: string | null;
+  salaryMin: number | null;
+  salaryMax: number | null;
+  salaryCurrency: string | null;
+  notes: string | null;
+  appliedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Pagination {
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface ApplicationList {
+  data: Application[];
+  pagination: Pagination;
+}

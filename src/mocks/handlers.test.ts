@@ -67,3 +67,34 @@ describe('mock auth API', () => {
     expect(res.status).toBe(204);
   });
 });
+
+describe('mock applications API', () => {
+  async function loginAsSeedUser(): Promise<string> {
+    const res = await post('/auth/login', { email: 'ada@example.com', password: 'password123' });
+    const { accessToken } = (await res.json()) as { accessToken: string };
+    return accessToken;
+  }
+
+  it('rejects a request with no bearer token', async () => {
+    const res = await fetch(`${API_URL}/applications`);
+    expect(res.status).toBe(401);
+    const body = (await res.json()) as { error: { code: string } };
+    expect(body.error.code).toBe('UNAUTHORIZED');
+  });
+
+  it('returns the seeded applications for a valid token', async () => {
+    const accessToken = await loginAsSeedUser();
+    const res = await fetch(`${API_URL}/applications`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      data: { company: string }[];
+      pagination: { total: number; totalPages: number };
+    };
+    expect(body.data).toHaveLength(4);
+    expect(body.data.map((a) => a.company)).toContain('Globex');
+    expect(body.pagination).toMatchObject({ total: 4, totalPages: 1 });
+  });
+});

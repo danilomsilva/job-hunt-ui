@@ -1,8 +1,9 @@
 /**
  * MSW handlers that stand in for job-hunt-api during tests. Behaviour is kept
- * faithful to its `src/routes/auth.ts`: unique-email conflict on register,
- * one opaque "invalid email or password" on login, refresh-token rotation, and
- * the shared `{ error: { code, message, details? }, requestId }` error body.
+ * faithful to its `src/routes/auth.ts` and `src/routes/applications.ts`:
+ * unique-email conflict on register, one opaque "invalid email or password" on
+ * login, refresh-token rotation, a bearer-guarded applications list, and the
+ * shared `{ error: { code, message, details? }, requestId }` error body.
  */
 import { http, HttpResponse } from 'msw';
 import { z } from 'zod';
@@ -35,6 +36,29 @@ function validationError(error: z.ZodError) {
 function makeAccessToken(userId: string): string {
   const payload = { sub: userId, iat: Date.now(), exp: Date.now() + 15 * 60 * 1000 };
   return `mock.${btoa(JSON.stringify(payload))}.sig`;
+}
+
+const accessPayloadSchema = z.object({ sub: z.string() });
+
+/**
+ * The `Bearer` token's user, or `undefined` if the header is missing, malformed,
+ * or names a user we don't know. Enough of a guard to exercise the client's
+ * 401 → refresh → retry path against a real endpoint.
+ */
+function userIdFromAuthHeader(request: Request): string | undefined {
+  const header = request.headers.get('Authorization');
+  if (header?.startsWith('Bearer ') !== true) return undefined;
+
+  const payload = header.slice('Bearer '.length).split('.')[1];
+  if (payload === undefined) return undefined;
+
+  try {
+    const parsed = accessPayloadSchema.safeParse(JSON.parse(atob(payload)));
+    if (!parsed.success) return undefined;
+    return db.users.some((u) => u.id === parsed.data.sub) ? parsed.data.sub : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 function issueTokenPair(user: MockUser) {
@@ -119,5 +143,21 @@ export const handlers = [
       db.refreshTokens = db.refreshTokens.filter((t) => t.token !== parsed.data.refreshToken);
     }
     return new HttpResponse(null, { status: 204 });
+  }),
+
+  http.get(`${API_URL}/applications`, ({ request }) => {
+    const userId = userIdFromAuthHeader(request);
+    if (userId === undefined) {
+      return HttpResponse.json(errorBody('UNAUTHORIZED', 'Invalid or expired access token'), {
+        status: 401,
+      });
+    }
+
+    // Filtering / sorting / pagination params are ignored until Stage 4.
+    const data = db.applications.filter((application) => application.userId === userId);
+    return HttpResponse.json({
+      data,
+      pagination: { page: 1, pageSize: 20, total: data.length, totalPages: 1 },
+    });
   }),
 ];
