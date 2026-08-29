@@ -51,6 +51,6 @@ filtering/sorting/pagination, and create/edit/detail views for a job application
 - [x] Connected to `job-hunt-api`'s `/health` (Stage 1 check; superseded by the auth flow, which exercises the API for real)
 - [x] Auth flow (login, register, hybrid token storage, automatic refresh, logout, protected routes)
 - [x] Applications list (fetch, loading/error/empty states)
-- [ ] Filtering, sorting, pagination wired to the list
+- [x] Filtering, sorting, pagination wired to the list (URL query string as the source of truth)
 - [ ] Create / edit / detail views
 - [ ] Component and integration tests

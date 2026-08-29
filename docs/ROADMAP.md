@@ -87,7 +87,7 @@ roadmap only covers what the _frontend_ does with them.
 - [x] Connected to `job-hunt-api`'s `/health` (Stage 1 check; the auth flow now exercises the API for real)
 - [x] Auth flow (login, register, token storage, automatic refresh, logout)
 - [x] Applications list (fetch, loading/error/empty states)
-- [ ] Filtering, sorting, pagination wired to the list
+- [x] Filtering, sorting, pagination wired to the list (URL query string as the source of truth)
 - [ ] Create / edit / detail views
 - [ ] Component and integration tests
 
