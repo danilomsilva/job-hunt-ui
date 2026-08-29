@@ -88,7 +88,7 @@ roadmap only covers what the _frontend_ does with them.
 - [x] Auth flow (login, register, token storage, automatic refresh, logout)
 - [x] Applications list (fetch, loading/error/empty states)
 - [x] Filtering, sorting, pagination wired to the list (URL query string as the source of truth)
-- [ ] Create / edit / detail views
+- [x] Create / edit / detail views (+ delete with inline confirm)
 - [ ] Component and integration tests
 
 ### Future / optional — not scheduled into a stage yet

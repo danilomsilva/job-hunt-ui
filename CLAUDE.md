@@ -52,5 +52,5 @@ filtering/sorting/pagination, and create/edit/detail views for a job application
 - [x] Auth flow (login, register, hybrid token storage, automatic refresh, logout, protected routes)
 - [x] Applications list (fetch, loading/error/empty states)
 - [x] Filtering, sorting, pagination wired to the list (URL query string as the source of truth)
-- [ ] Create / edit / detail views
+- [x] Create / edit / detail views (+ delete with inline confirm)
 - [ ] Component and integration tests
