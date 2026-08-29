@@ -82,19 +82,46 @@ describe('mock applications API', () => {
     expect(body.error.code).toBe('UNAUTHORIZED');
   });
 
-  it('returns the seeded applications for a valid token', async () => {
+  interface ListBody {
+    data: { company: string; status: string }[];
+    pagination: { page: number; pageSize: number; total: number; totalPages: number };
+  }
+
+  async function list(query: string): Promise<ListBody> {
     const accessToken = await loginAsSeedUser();
-    const res = await fetch(`${API_URL}/applications`, {
+    const res = await fetch(`${API_URL}/applications${query}`, {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
-
     expect(res.status).toBe(200);
-    const body = (await res.json()) as {
-      data: { company: string }[];
-      pagination: { total: number; totalPages: number };
-    };
+    return (await res.json()) as ListBody;
+  }
+
+  it('returns the seeded applications for a valid token', async () => {
+    const body = await list('');
     expect(body.data).toHaveLength(4);
     expect(body.data.map((a) => a.company)).toContain('Globex');
     expect(body.pagination).toMatchObject({ total: 4, totalPages: 1 });
+  });
+
+  it('filters by status', async () => {
+    const body = await list('?status=interview');
+    expect(body.data).toHaveLength(1);
+    expect(body.data[0]).toMatchObject({ company: 'Globex', status: 'interview' });
+  });
+
+  it('filters by company as a case-insensitive substring', async () => {
+    const body = await list('?company=obex');
+    expect(body.data.map((a) => a.company)).toEqual(['Globex']);
+  });
+
+  it('sorts by company ascending', async () => {
+    const body = await list('?sortBy=company&sortOrder=asc');
+    expect(body.data.map((a) => a.company)).toEqual(['Globex', 'Hooli', 'Initech', 'Umbrella']);
+  });
+
+  it('paginates', async () => {
+    const body = await list('?pageSize=2&page=2&sortBy=company&sortOrder=asc');
+    expect(body.data.map((a) => a.company)).toEqual(['Initech', 'Umbrella']);
+    expect(body.pagination).toMatchObject({ page: 2, pageSize: 2, total: 4, totalPages: 2 });
   });
 });

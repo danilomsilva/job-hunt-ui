@@ -8,6 +8,7 @@
 import { http, HttpResponse } from 'msw';
 import { z } from 'zod';
 import { credentialsSchema } from '../auth/schemas';
+import type { Application, ApplicationSort } from '../lib/types';
 import { db, findRefreshToken, findUserByEmail, type MockUser } from './db';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
@@ -59,6 +60,47 @@ function userIdFromAuthHeader(request: Request): string | undefined {
   } catch {
     return undefined;
   }
+}
+
+function isSort(value: string | null): value is ApplicationSort {
+  return (
+    value === 'createdAt' || value === 'updatedAt' || value === 'appliedAt' || value === 'company'
+  );
+}
+
+interface ListQuery {
+  status: string | null;
+  company: string | null;
+  sortBy: ApplicationSort;
+  sortOrder: 'asc' | 'desc';
+  page: number;
+  pageSize: number;
+}
+
+/** Parse `GET /applications` query params the way job-hunt-api's `listQuerySchema` does. */
+function parseListQuery(url: string): ListQuery {
+  const params = new URL(url).searchParams;
+  const sortByRaw = params.get('sortBy');
+  const page = Math.max(1, Number(params.get('page')) || 1);
+  const pageSize = Math.min(100, Math.max(1, Number(params.get('pageSize')) || 20));
+  return {
+    status: params.get('status'),
+    company: params.get('company'),
+    sortBy: isSort(sortByRaw) ? sortByRaw : 'createdAt',
+    sortOrder: params.get('sortOrder') === 'asc' ? 'asc' : 'desc',
+    page,
+    pageSize,
+  };
+}
+
+function compareBy(a: Application, b: Application, sortBy: ApplicationSort): number {
+  if (sortBy === 'company') return a.company.localeCompare(b.company);
+  const left = a[sortBy];
+  const right = b[sortBy];
+  if (left === right) return 0;
+  if (left === null) return 1; // nulls last
+  if (right === null) return -1;
+  return left < right ? -1 : 1;
 }
 
 function issueTokenPair(user: MockUser) {
@@ -153,11 +195,32 @@ export const handlers = [
       });
     }
 
-    // Filtering / sorting / pagination params are ignored until Stage 4.
-    const data = db.applications.filter((application) => application.userId === userId);
+    const query = parseListQuery(request.url);
+    let rows = db.applications.filter((application) => application.userId === userId);
+    if (query.status !== null) {
+      rows = rows.filter((application) => application.status === query.status);
+    }
+    if (query.company !== null) {
+      const needle = query.company.toLowerCase();
+      rows = rows.filter((application) => application.company.toLowerCase().includes(needle));
+    }
+    rows = [...rows].sort((a, b) => {
+      const result = compareBy(a, b, query.sortBy);
+      return query.sortOrder === 'asc' ? result : -result;
+    });
+
+    const total = rows.length;
+    const start = (query.page - 1) * query.pageSize;
+    const data = rows.slice(start, start + query.pageSize);
+
     return HttpResponse.json({
       data,
-      pagination: { page: 1, pageSize: 20, total: data.length, totalPages: 1 },
+      pagination: {
+        page: query.page,
+        pageSize: query.pageSize,
+        total,
+        totalPages: Math.ceil(total / query.pageSize) || 1,
+      },
     });
   }),
 ];

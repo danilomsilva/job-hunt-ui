@@ -57,3 +57,8 @@ export interface ApplicationList {
   data: Application[];
   pagination: Pagination;
 }
+
+/** Sortable columns on `GET /applications` (job-hunt-api's `listQuerySchema`). */
+export type ApplicationSort = 'createdAt' | 'updatedAt' | 'appliedAt' | 'company';
+
+export type SortOrder = 'asc' | 'desc';

@@ -1,10 +1,33 @@
 import { apiFetch } from '../lib/api';
-import type { ApplicationList } from '../lib/types';
+import type { ApplicationList, ApplicationSort, ApplicationStatus, SortOrder } from '../lib/types';
+
+/** Query params for `GET /applications` — all optional, see job-hunt-api's `listQuerySchema`. */
+export interface ListApplicationsParams {
+  status?: ApplicationStatus;
+  company?: string;
+  sortBy?: ApplicationSort;
+  sortOrder?: SortOrder;
+  page?: number;
+  pageSize?: number;
+}
+
+function toQueryString(params: ListApplicationsParams): string {
+  const search = new URLSearchParams();
+  if (params.status) search.set('status', params.status);
+  if (params.company) search.set('company', params.company);
+  if (params.sortBy) search.set('sortBy', params.sortBy);
+  if (params.sortOrder) search.set('sortOrder', params.sortOrder);
+  if (params.page !== undefined) search.set('page', String(params.page));
+  if (params.pageSize !== undefined) search.set('pageSize', String(params.pageSize));
+  return search.toString();
+}
 
 /**
- * `GET /applications` — the authenticated user's applications. Filtering,
- * sorting, and pagination params land in Stage 4.
+ * `GET /applications` — the authenticated user's applications, filtered, sorted,
+ * and paginated per `params`. Unset params fall back to the API's defaults
+ * (`sortBy=createdAt`, `sortOrder=desc`, `page=1`, `pageSize=20`).
  */
-export function listApplications(): Promise<ApplicationList> {
-  return apiFetch<ApplicationList>('/applications');
+export function listApplications(params: ListApplicationsParams = {}): Promise<ApplicationList> {
+  const query = toQueryString(params);
+  return apiFetch<ApplicationList>(`/applications${query ? `?${query}` : ''}`);
 }
