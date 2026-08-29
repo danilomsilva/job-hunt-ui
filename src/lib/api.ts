@@ -132,3 +132,11 @@ function endSession(): void {
   clearSession();
   onSessionExpired?.();
 }
+
+/**
+ * Used once at startup to turn a persisted refresh token back into a live
+ * access token. Same machinery as the on-401 path.
+ */
+export async function restoreSession(): Promise<boolean> {
+  return refreshAccessToken();
+}
