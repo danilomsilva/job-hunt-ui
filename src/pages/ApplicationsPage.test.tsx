@@ -48,6 +48,20 @@ describe('ApplicationsPage', () => {
     expect(screen.getAllByRole('row')).toHaveLength(5);
   });
 
+  it('links to the new-application page and to each row detail', async () => {
+    await seedSession();
+    renderPage();
+
+    await screen.findByText('Globex');
+    expect(screen.getByRole('link', { name: 'New application' })).toHaveAttribute(
+      'href',
+      '/applications/new',
+    );
+    expect(screen.getByRole('link', { name: 'Globex' }).getAttribute('href')).toMatch(
+      /^\/applications\/[0-9a-f-]+$/,
+    );
+  });
+
   it('shows an empty state when there are none', async () => {
     await seedSession();
     server.use(http.get(`${API_URL}/applications`, () => emptyList()));

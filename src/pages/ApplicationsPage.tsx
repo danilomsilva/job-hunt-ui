@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { formatAppliedAt } from '../applications/formatStatus';
 import { ListControls } from '../applications/ListControls';
 import { Pagination } from '../applications/Pagination';
@@ -16,7 +17,15 @@ export function ApplicationsPage() {
     <div className="min-h-screen bg-slate-50">
       <Header />
       <main className="p-8">
-        <h1 className="text-xl font-semibold text-slate-900">Applications</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-semibold text-slate-900">Applications</h1>
+          <Link
+            to="/applications/new"
+            className="rounded bg-slate-900 px-3 py-2 text-sm font-medium text-white"
+          >
+            New application
+          </Link>
+        </div>
 
         <ListControls params={params} onFilter={setFilter} />
 
@@ -59,7 +68,14 @@ export function ApplicationsPage() {
               <tbody>
                 {applications.map((application) => (
                   <tr key={application.id} className="border-b border-slate-100">
-                    <td className="py-2 pr-4 text-slate-900">{application.company}</td>
+                    <td className="py-2 pr-4">
+                      <Link
+                        to={`/applications/${application.id}`}
+                        className="font-medium text-slate-900 underline"
+                      >
+                        {application.company}
+                      </Link>
+                    </td>
                     <td className="py-2 pr-4 text-slate-600">{application.role}</td>
                     <td className="py-2 pr-4">
                       <StatusBadge status={application.status} />
