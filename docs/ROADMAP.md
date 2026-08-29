@@ -89,7 +89,10 @@ roadmap only covers what the _frontend_ does with them.
 - [x] Applications list (fetch, loading/error/empty states)
 - [x] Filtering, sorting, pagination wired to the list (URL query string as the source of truth)
 - [x] Create / edit / detail views (+ delete with inline confirm)
-- [ ] Component and integration tests
+- [x] Component and integration tests (Vitest + RTL + MSW, an end-to-end flow test, axe a11y checks)
+- [x] Polish (skip link, focus-on-route-change, per-page titles, `aria-describedby` on form errors, `lang="en-IE"`)
+
+**Phase 2 is complete.**
 
 ### Future / optional — not scheduled into a stage yet
 

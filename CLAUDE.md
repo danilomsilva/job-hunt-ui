@@ -46,6 +46,8 @@ filtering/sorting/pagination, and create/edit/detail views for a job application
 
 ## Current status
 
+Phase 2 complete — all stages shipped.
+
 - [x] Repo created
 - [x] Project scaffolded (Vite, TypeScript, ESLint, Prettier, Tailwind)
 - [x] Connected to `job-hunt-api`'s `/health` (Stage 1 check; superseded by the auth flow, which exercises the API for real)
@@ -53,4 +55,5 @@ filtering/sorting/pagination, and create/edit/detail views for a job application
 - [x] Applications list (fetch, loading/error/empty states)
 - [x] Filtering, sorting, pagination wired to the list (URL query string as the source of truth)
 - [x] Create / edit / detail views (+ delete with inline confirm)
-- [ ] Component and integration tests
+- [x] Component and integration tests (Vitest + RTL + MSW, an end-to-end flow test, axe a11y checks)
+- [x] Polish (skip link, focus-on-route-change, per-page titles, form errors linked via `aria-describedby`, `lang="en-IE"`)
