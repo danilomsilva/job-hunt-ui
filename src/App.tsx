@@ -3,6 +3,7 @@ import { ProtectedRoute } from './routes/ProtectedRoute';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { ApplicationsPage } from './pages/ApplicationsPage';
+import { ApplicationDetailPage } from './pages/ApplicationDetailPage';
 import { EditApplicationPage, NewApplicationPage } from './pages/ApplicationFormPage';
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
       >
         <Route path="/applications" element={<ApplicationsPage />} />
         <Route path="/applications/new" element={<NewApplicationPage />} />
+        <Route path="/applications/:id" element={<ApplicationDetailPage />} />
         <Route path="/applications/:id/edit" element={<EditApplicationPage />} />
       </Route>
 
