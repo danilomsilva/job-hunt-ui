@@ -1,24 +1,12 @@
-import { useState, type ReactNode } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { deleteApplication } from '../applications/applicationsApi';
 import { formatSalary } from '../applications/formatApplication';
 import { formatAppliedAt, STATUS_LABELS } from '../applications/formatStatus';
 import { StatusBadge } from '../applications/StatusBadge';
 import { useApplication } from '../applications/useApplication';
-import { Header } from '../components/Header';
+import { PageLayout } from '../components/PageLayout';
 import { ApiError } from '../lib/api';
-
-function Shell({ children }: { children: ReactNode }) {
-  return (
-    <div className="min-h-screen bg-slate-50">
-      <Header />
-      <main className="p-8">
-        <h1 className="text-xl font-semibold text-slate-900">Application</h1>
-        {children}
-      </main>
-    </div>
-  );
-}
 
 const backLink = (
   <Link to="/applications" className="mt-4 inline-block text-sm text-slate-600 underline">
@@ -52,24 +40,24 @@ export function ApplicationDetailPage() {
 
   if (status === 'loading') {
     return (
-      <Shell>
+      <PageLayout title="Application">
         <p className="mt-4 text-sm text-slate-500">Loading…</p>
-      </Shell>
+      </PageLayout>
     );
   }
 
   if (status === 'notFound') {
     return (
-      <Shell>
+      <PageLayout title="Application">
         <p className="mt-4 text-sm text-slate-500">That application doesn’t exist.</p>
         {backLink}
-      </Shell>
+      </PageLayout>
     );
   }
 
   if (application === null) {
     return (
-      <Shell>
+      <PageLayout title="Application">
         <p role="alert" className="mt-4 text-sm text-red-700">
           {error}
         </p>
@@ -80,12 +68,12 @@ export function ApplicationDetailPage() {
         >
           Try again
         </button>
-      </Shell>
+      </PageLayout>
     );
   }
 
   return (
-    <Shell>
+    <PageLayout title="Application">
       <div className="mt-4 max-w-xl rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
         <div className="flex items-start justify-between">
           <div>
@@ -188,6 +176,6 @@ export function ApplicationDetailPage() {
       </div>
 
       {backLink}
-    </Shell>
+    </PageLayout>
   );
 }

@@ -63,7 +63,11 @@ export function CredentialsForm({
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-50 p-4">
+    <main
+      id="main"
+      tabIndex={-1}
+      className="flex min-h-screen items-center justify-center bg-slate-50 p-4 outline-none"
+    >
       <form
         onSubmit={(event) => {
           event.preventDefault();
