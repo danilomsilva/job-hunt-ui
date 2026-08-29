@@ -39,16 +39,16 @@ API, and create/edit/detail views for an application.
 [`docs/API.md`](https://github.com/danilomsilva/job-hunt-api/blob/main/docs/API.md)
 and its live Swagger UI (`/ui` on the running backend) are the source of
 truth for every endpoint, request/response shape, and status code — this
-roadmap only covers what the *frontend* does with them.
+roadmap only covers what the _frontend_ does with them.
 
-| Stage             | Outcome                                                                |
-| ------------------ | ------------------------------------------------------------------------ |
-| 1. Scaffold        | Vite + React + TS strict, ESLint + Prettier, Tailwind, connects to `/health` |
-| 2. Auth flow       | Login/register pages, token storage, automatic refresh, protected routes, logout |
-| 3. Applications list | Fetch and render via TanStack Query, loading/error states                |
-| 4. List refinements | Filtering, sorting, pagination UI wired to `GET /applications`'s query params |
-| 5. Create/edit/detail | Forms (React Hook Form + Zod) for create/update, a detail view, delete   |
-| 6. Polish          | Empty states, accessibility pass, component + integration tests          |
+| Stage                 | Outcome                                                                          |
+| --------------------- | -------------------------------------------------------------------------------- |
+| 1. Scaffold           | Vite + React + TS strict, ESLint + Prettier, Tailwind, connects to `/health`     |
+| 2. Auth flow          | Login/register pages, token storage, automatic refresh, protected routes, logout |
+| 3. Applications list  | Fetch and render via TanStack Query, loading/error states                        |
+| 4. List refinements   | Filtering, sorting, pagination UI wired to `GET /applications`'s query params    |
+| 5. Create/edit/detail | Forms (React Hook Form + Zod) for create/update, a detail view, delete           |
+| 6. Polish             | Empty states, accessibility pass, component + integration tests                  |
 
 ### Pages & flow
 
