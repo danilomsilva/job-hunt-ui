@@ -10,7 +10,7 @@ Phase 1's — learn the fundamentals properly, not ship fast with shortcuts.
 ## Tech stack decisions
 
 - **Build tool:** Vite — fast dev server, native TypeScript, no bundler config
-- **Framework:** React 18, TypeScript (strict mode)
+- **Framework:** React 19, TypeScript (strict mode)
 - **Routing:** React Router — the standard client-side router for a React SPA
 - **Server state:** TanStack Query — caching, refetching, loading/error states
   for data from `job-hunt-api`, instead of hand-rolled `useEffect` fetching
@@ -73,9 +73,9 @@ roadmap only covers what the _frontend_ does with them.
 
 ### Checklist
 
-- [ ] Repo created
-- [ ] Project scaffolded (Vite, TypeScript, ESLint, Prettier, Tailwind)
-- [ ] Routing set up, connects to `job-hunt-api`'s `/health`
+- [x] Repo created
+- [x] Project scaffolded (Vite, TypeScript, ESLint, Prettier, Tailwind)
+- [x] Connects to `job-hunt-api`'s `/health` (routing itself arrives with the Auth flow)
 - [ ] Auth flow (login, register, token storage, automatic refresh, logout)
 - [ ] Applications list (fetch, loading/error states)
 - [ ] Filtering, sorting, pagination wired to the list
