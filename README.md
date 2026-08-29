@@ -93,6 +93,17 @@ npm run dev               # http://localhost:5173
 The backend's CORS is configured to allow `http://localhost:5173` specifically,
 so the Vite dev server works against it out of the box.
 
+### Seeding demo data
+
+To exercise filtering / sorting / pagination against the real backend:
+
+```bash
+npm run seed      # creates demo@example.com / demopassword with 30 applications
+```
+
+Re-running clears and reseeds. Override with `SEED_EMAIL`, `SEED_PASSWORD`,
+`SEED_COUNT`, or `SEED_API_URL`.
+
 ## Testing
 
 ```bash
