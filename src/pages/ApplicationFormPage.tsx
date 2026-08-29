@@ -4,9 +4,11 @@ import { createApplication, updateApplication } from '../applications/applicatio
 import { emptyForm, formFromApplication } from '../applications/schemas';
 import { useApplication } from '../applications/useApplication';
 import { PageLayout } from '../components/PageLayout';
+import { useDocumentTitle } from '../lib/useDocumentTitle';
 
 export function NewApplicationPage() {
   const navigate = useNavigate();
+  useDocumentTitle('New application');
 
   return (
     <PageLayout title="New application">
@@ -30,6 +32,7 @@ export function EditApplicationPage() {
   const id = params.id ?? '';
   const navigate = useNavigate();
   const { application, status } = useApplication(id);
+  useDocumentTitle('Edit application');
 
   if (status === 'loading') {
     return (

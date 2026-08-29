@@ -1,10 +1,12 @@
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { CredentialsForm } from '../auth/CredentialsForm';
 import { useAuth } from '../auth/useAuth';
+import { useDocumentTitle } from '../lib/useDocumentTitle';
 
 export function RegisterPage() {
   const { status, register } = useAuth();
   const navigate = useNavigate();
+  useDocumentTitle('Register');
 
   if (status === 'authenticated') {
     return <Navigate to="/applications" replace />;

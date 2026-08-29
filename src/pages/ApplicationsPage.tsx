@@ -6,10 +6,12 @@ import { StatusBadge } from '../applications/StatusBadge';
 import { useApplications } from '../applications/useApplications';
 import { useListParams } from '../applications/useListParams';
 import { PageLayout } from '../components/PageLayout';
+import { useDocumentTitle } from '../lib/useDocumentTitle';
 
 export function ApplicationsPage() {
   const { params, setFilter, setPage } = useListParams();
   const { applications, pagination, status, error, reload } = useApplications(params);
+  useDocumentTitle('Applications');
 
   const filtersActive = params.status !== undefined || params.company !== undefined;
 

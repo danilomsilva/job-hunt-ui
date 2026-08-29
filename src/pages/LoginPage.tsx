@@ -1,11 +1,13 @@
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { CredentialsForm } from '../auth/CredentialsForm';
 import { useAuth } from '../auth/useAuth';
+import { useDocumentTitle } from '../lib/useDocumentTitle';
 
 export function LoginPage() {
   const { status, login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  useDocumentTitle('Log in');
 
   const redirectState = location.state as { from?: { pathname?: string } } | null;
   const redirectTo = redirectState?.from?.pathname ?? '/applications';

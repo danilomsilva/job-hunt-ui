@@ -7,6 +7,7 @@ import { StatusBadge } from '../applications/StatusBadge';
 import { useApplication } from '../applications/useApplication';
 import { PageLayout } from '../components/PageLayout';
 import { ApiError } from '../lib/api';
+import { useDocumentTitle } from '../lib/useDocumentTitle';
 
 const backLink = (
   <Link to="/applications" className="mt-4 inline-block text-sm text-slate-600 underline">
@@ -19,6 +20,7 @@ export function ApplicationDetailPage() {
   const id = params.id ?? '';
   const navigate = useNavigate();
   const { application, status, error, reload } = useApplication(id);
+  useDocumentTitle(application?.company ?? 'Application');
 
   const [confirming, setConfirming] = useState(false);
   const [deleting, setDeleting] = useState(false);
