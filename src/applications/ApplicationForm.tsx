@@ -190,7 +190,7 @@ export function ApplicationForm({
       <Field
         id="salaryCurrency"
         label="Currency"
-        placeholder="USD"
+        placeholder="EUR"
         value={values.salaryCurrency}
         error={fieldErrors.salaryCurrency}
         onChange={(value) => {

@@ -23,7 +23,7 @@ export const emptyForm: ApplicationFormValues = {
   jobUrl: '',
   salaryMin: '',
   salaryMax: '',
-  salaryCurrency: '',
+  salaryCurrency: 'EUR',
   notes: '',
   appliedAt: '',
 };

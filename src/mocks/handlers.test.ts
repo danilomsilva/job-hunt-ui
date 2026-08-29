@@ -133,7 +133,7 @@ describe('mock applications API', () => {
     jobUrl: 'https://wayne.example/jobs/1',
     salaryMin: 100000,
     salaryMax: 150000,
-    salaryCurrency: 'USD',
+    salaryCurrency: 'EUR',
     notes: 'Applied via referral',
     appliedAt: '2026-08-15',
   };

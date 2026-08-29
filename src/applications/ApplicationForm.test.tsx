@@ -10,6 +10,9 @@ const filled: ApplicationFormValues = {
   company: 'Acme',
   role: 'Engineer',
   status: 'applied',
+  // Blank so the "blank optionals become null" assertion still covers currency,
+  // even though a fresh form defaults it to EUR.
+  salaryCurrency: '',
 };
 
 function renderForm(overrides: {
@@ -39,6 +42,11 @@ describe('ApplicationForm', () => {
     expect(await screen.findByText('Company is required')).toBeInTheDocument();
     expect(screen.getByText('Role is required')).toBeInTheDocument();
     expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it('defaults the currency to EUR', () => {
+    renderForm({});
+    expect(screen.getByLabelText('Currency')).toHaveValue('EUR');
   });
 
   it('flags a salary minimum above the maximum', async () => {
