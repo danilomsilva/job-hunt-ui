@@ -81,3 +81,15 @@ roadmap only covers what the _frontend_ does with them.
 - [ ] Filtering, sorting, pagination wired to the list
 - [ ] Create / edit / detail views
 - [ ] Component and integration tests
+
+### Future / optional — not scheduled into a stage yet
+
+- **Containerize the frontend**, as a learning exercise (`job-hunt-api` did
+  this for the backend). Different shape than the backend's: a frontend
+  build produces static files (`dist/`), so this means bundling a small web
+  server (e.g. nginx) to serve them, not "run a persistent Node process" —
+  a genuinely different exercise, not a repeat of the backend's Dockerfile.
+  Also less commonly done in the real world than the backend case — static
+  frontends usually deploy straight to something like Vercel/Netlify rather
+  than a container. Circle back to this deliberately later, not folded into
+  Stage 1.
