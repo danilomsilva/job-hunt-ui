@@ -1,5 +1,7 @@
 # job-hunt-ui
 
+![CI](https://github.com/danilomsilva/job-hunt-ui/actions/workflows/ci.yml/badge.svg)
+
 A React + TypeScript client for [`job-hunt-api`](https://github.com/danilomsilva/job-hunt-api) —
 Phase 2 of the same learning roadmap. Auth with automatic token refresh, an
 applications list wired to filtering / sorting / pagination, and create / edit /
