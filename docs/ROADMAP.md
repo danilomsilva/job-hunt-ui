@@ -54,9 +54,9 @@ roadmap only covers what the _frontend_ does with them.
 | --------------------- | -------------------------------------------------------------------------------- |
 | 1. Scaffold           | Vite + React + TS strict, ESLint + Prettier, Tailwind, connects to `/health`     |
 | 2. Auth flow          | Login/register pages, token storage, automatic refresh, protected routes, logout |
-| 3. Applications list  | Fetch and render via TanStack Query, loading/error states                        |
+| 3. Applications list  | Fetch and render (hand-rolled `useEffect`), loading/error/empty states           |
 | 4. List refinements   | Filtering, sorting, pagination UI wired to `GET /applications`'s query params    |
-| 5. Create/edit/detail | Forms (React Hook Form + Zod) for create/update, a detail view, delete           |
+| 5. Create/edit/detail | Forms (controlled + Zod) for create/update, a detail view, delete                |
 | 6. Polish             | Empty states, accessibility pass, component + integration tests                  |
 
 ### Pages & flow
@@ -86,7 +86,7 @@ roadmap only covers what the _frontend_ does with them.
 - [x] Project scaffolded (Vite, TypeScript, ESLint, Prettier, Tailwind)
 - [x] Connected to `job-hunt-api`'s `/health` (Stage 1 check; the auth flow now exercises the API for real)
 - [x] Auth flow (login, register, token storage, automatic refresh, logout)
-- [ ] Applications list (fetch, loading/error states)
+- [x] Applications list (fetch, loading/error/empty states)
 - [ ] Filtering, sorting, pagination wired to the list
 - [ ] Create / edit / detail views
 - [ ] Component and integration tests
