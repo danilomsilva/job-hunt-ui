@@ -41,6 +41,8 @@ describe('ApplicationForm', () => {
 
     expect(await screen.findByText('Company is required')).toBeInTheDocument();
     expect(screen.getByText('Role is required')).toBeInTheDocument();
+    // the message is wired to the input for assistive tech
+    expect(screen.getByLabelText('Company')).toHaveAccessibleDescription('Company is required');
     expect(onSubmit).not.toHaveBeenCalled();
   });
 

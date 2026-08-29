@@ -30,6 +30,9 @@ describe('LoginPage', () => {
 
     expect(await screen.findByText('Enter a valid email address')).toBeInTheDocument();
     expect(screen.getByText('Password must be at least 8 characters')).toBeInTheDocument();
+    expect(screen.getByLabelText('Email')).toHaveAccessibleDescription(
+      'Enter a valid email address',
+    );
     expect(screen.queryByText('applications page')).not.toBeInTheDocument();
   });
 

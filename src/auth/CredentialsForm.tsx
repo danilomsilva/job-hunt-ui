@@ -98,10 +98,13 @@ export function CredentialsForm({
             setEmail(event.target.value);
           }}
           aria-invalid={fieldErrors.email !== undefined}
+          aria-describedby={fieldErrors.email !== undefined ? 'email-error' : undefined}
           className="mt-1 w-full rounded border border-slate-300 px-3 py-2 text-sm"
         />
         {fieldErrors.email !== undefined && (
-          <p className="mt-1 text-xs text-red-600">{fieldErrors.email}</p>
+          <p id="email-error" className="mt-1 text-xs text-red-600">
+            {fieldErrors.email}
+          </p>
         )}
 
         <label htmlFor="password" className="mt-4 block text-sm font-medium text-slate-700">
@@ -117,10 +120,13 @@ export function CredentialsForm({
             setPassword(event.target.value);
           }}
           aria-invalid={fieldErrors.password !== undefined}
+          aria-describedby={fieldErrors.password !== undefined ? 'password-error' : undefined}
           className="mt-1 w-full rounded border border-slate-300 px-3 py-2 text-sm"
         />
         {fieldErrors.password !== undefined && (
-          <p className="mt-1 text-xs text-red-600">{fieldErrors.password}</p>
+          <p id="password-error" className="mt-1 text-xs text-red-600">
+            {fieldErrors.password}
+          </p>
         )}
 
         <button

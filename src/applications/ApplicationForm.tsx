@@ -27,6 +27,7 @@ interface FieldProps {
 }
 
 function Field({ id, label, value, error, type = 'text', placeholder, onChange }: FieldProps) {
+  const errorId = `${id}-error`;
   return (
     <div className="flex flex-col gap-1">
       <label htmlFor={id} className="text-xs font-medium text-slate-600">
@@ -38,12 +39,17 @@ function Field({ id, label, value, error, type = 'text', placeholder, onChange }
         value={value}
         placeholder={placeholder}
         aria-invalid={error !== undefined}
+        aria-describedby={error !== undefined ? errorId : undefined}
         onChange={(event) => {
           onChange(event.target.value);
         }}
         className={inputClass}
       />
-      {error !== undefined && <p className="text-xs text-red-600">{error}</p>}
+      {error !== undefined && (
+        <p id={errorId} className="text-xs text-red-600">
+          {error}
+        </p>
+      )}
     </div>
   );
 }
@@ -132,6 +138,8 @@ export function ApplicationForm({
         <select
           id="status"
           value={values.status}
+          aria-invalid={fieldErrors.status !== undefined}
+          aria-describedby={fieldErrors.status !== undefined ? 'status-error' : undefined}
           onChange={(event) => {
             setField('status', event.target.value);
           }}
@@ -144,7 +152,9 @@ export function ApplicationForm({
           ))}
         </select>
         {fieldErrors.status !== undefined && (
-          <p className="text-xs text-red-600">{fieldErrors.status}</p>
+          <p id="status-error" className="text-xs text-red-600">
+            {fieldErrors.status}
+          </p>
         )}
       </div>
 

@@ -41,7 +41,9 @@ export function ApplicationDetailPage() {
   if (status === 'loading') {
     return (
       <PageLayout title="Application">
-        <p className="mt-4 text-sm text-slate-500">Loading…</p>
+        <p role="status" className="mt-4 text-sm text-slate-500">
+          Loading…
+        </p>
       </PageLayout>
     );
   }

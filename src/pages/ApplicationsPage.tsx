@@ -27,7 +27,11 @@ export function ApplicationsPage() {
 
       <ListControls params={params} onFilter={setFilter} />
 
-      {status === 'loading' && <p className="mt-4 text-sm text-slate-500">Loading applications…</p>}
+      {status === 'loading' && (
+        <p role="status" className="mt-4 text-sm text-slate-500">
+          Loading applications…
+        </p>
+      )}
 
       {status === 'error' && (
         <div className="mt-4">

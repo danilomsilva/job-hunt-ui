@@ -34,7 +34,9 @@ export function EditApplicationPage() {
   if (status === 'loading') {
     return (
       <PageLayout title="Edit application">
-        <p className="mt-4 text-sm text-slate-500">Loading…</p>
+        <p role="status" className="mt-4 text-sm text-slate-500">
+          Loading…
+        </p>
       </PageLayout>
     );
   }
