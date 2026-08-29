@@ -27,7 +27,9 @@ filtering/sorting/pagination, and create/edit/detail views for a job application
 - Every form validates with the same Zod schema shape the backend expects
 - Loading and error states are handled explicitly for every request — no silent failures
 - Write component/integration tests alongside each feature, not after
-- Commit often with clear, descriptive commit messages
+- Commit often with clear, descriptive commit messages — Conventional Commits
+  (`feat:`, `fix:`, `docs:`, `refactor:`, `chore:`, `test:`), same convention as
+  `job-hunt-api`
 
 ## What to avoid
 
