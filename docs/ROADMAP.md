@@ -84,8 +84,8 @@ roadmap only covers what the _frontend_ does with them.
 
 - [x] Repo created
 - [x] Project scaffolded (Vite, TypeScript, ESLint, Prettier, Tailwind)
-- [x] Connects to `job-hunt-api`'s `/health` (routing itself arrives with the Auth flow)
-- [ ] Auth flow (login, register, token storage, automatic refresh, logout)
+- [x] Connected to `job-hunt-api`'s `/health` (Stage 1 check; the auth flow now exercises the API for real)
+- [x] Auth flow (login, register, token storage, automatic refresh, logout)
 - [ ] Applications list (fetch, loading/error states)
 - [ ] Filtering, sorting, pagination wired to the list
 - [ ] Create / edit / detail views

@@ -48,8 +48,8 @@ filtering/sorting/pagination, and create/edit/detail views for a job application
 
 - [x] Repo created
 - [x] Project scaffolded (Vite, TypeScript, ESLint, Prettier, Tailwind)
-- [x] Connects to `job-hunt-api`'s `/health` (routing itself arrives with the Auth flow)
-- [ ] Auth flow (login, register, token storage, automatic refresh, logout)
+- [x] Connected to `job-hunt-api`'s `/health` (Stage 1 check; superseded by the auth flow, which exercises the API for real)
+- [x] Auth flow (login, register, hybrid token storage, automatic refresh, logout, protected routes)
 - [ ] Applications list (fetch, loading/error states)
 - [ ] Filtering, sorting, pagination wired to the list
 - [ ] Create / edit / detail views
