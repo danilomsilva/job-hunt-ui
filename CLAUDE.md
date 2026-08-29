@@ -46,7 +46,10 @@ filtering/sorting/pagination, and create/edit/detail views for a job application
 
 ## Current status
 
-Phase 2 complete — all stages shipped.
+Phase 2 complete — all stages shipped. CI (GitHub Actions) runs
+lint/format/typecheck/test/build on every push; README rewritten from the Vite
+boilerplate. Deploy/containerization deliberately skipped — see
+[`docs/ROADMAP.md`](docs/ROADMAP.md#future--optional--not-scheduled-into-a-stage-yet).
 
 - [x] Repo created
 - [x] Project scaffolded (Vite, TypeScript, ESLint, Prettier, Tailwind)

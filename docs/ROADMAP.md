@@ -92,16 +92,29 @@ roadmap only covers what the _frontend_ does with them.
 - [x] Component and integration tests (Vitest + RTL + MSW, an end-to-end flow test, axe a11y checks)
 - [x] Polish (skip link, focus-on-route-change, per-page titles, `aria-describedby` on form errors, `lang="en-IE"`)
 
-**Phase 2 is complete.**
+**Phase 2 is complete.** CI (GitHub Actions, `.github/workflows/ci.yml`) runs
+lint, format check, typecheck, the full test suite, and a production build on
+every push and PR — no Postgres/Docker needed, the suite runs against MSW. The
+README covers setup, the architecture decisions, and running against
+`job-hunt-api`.
+
+> `.env` is gitignored, so `VITE_API_URL` is undefined in CI. Tests pin it via
+> `test.env` in `vite.config.ts` (the MSW handlers target that base URL);
+> `src/lib/api.ts` deliberately has no fallback so a real deployment fails loudly
+> if it's unset.
 
 ### Future / optional — not scheduled into a stage yet
 
-- **Containerize the frontend**, as a learning exercise (`job-hunt-api` did
-  this for the backend). Different shape than the backend's: a frontend
-  build produces static files (`dist/`), so this means bundling a small web
-  server (e.g. nginx) to serve them, not "run a persistent Node process" —
-  a genuinely different exercise, not a repeat of the backend's Dockerfile.
-  Also less commonly done in the real world than the backend case — static
-  frontends usually deploy straight to something like Vercel/Netlify rather
-  than a container. Circle back to this deliberately later, not folded into
-  Stage 1.
+- **Containerize the frontend / deploy a live demo** — considered and
+  deliberately deferred (2026-08-29). A containerized SPA (nginx serving
+  `dist/`) is a genuinely different exercise from the backend's Dockerfile,
+  but it produces nothing a reviewer can see. A live demo would be
+  higher-value, but the frontend needs an API and `job-hunt-api` is
+  intentionally not hosted — a demo would have to run an in-browser MSW mock
+  mode. Both are worthwhile later; neither earns its weight now. The project
+  stays lean and local.
+- **Playwright browser E2E** — the current end-to-end test
+  (`src/App.integration.test.tsx`) drives the whole app through the router but
+  in jsdom against the MSW mock. A real-browser suite would need Chromium + the
+  live backend as CI services; deferred as more infra than it earns for a
+  learning project.
