@@ -107,14 +107,27 @@ describe('ApplicationsPage', () => {
     expect(screen.getAllByRole('row')).toHaveLength(2); // header + one match
   });
 
-  it('shows the filtered empty copy (no CTA) when a filter matches nothing', async () => {
+  it('shows the narrowed empty copy (no CTA) when a filter matches nothing', async () => {
     await seedSession();
     renderPage('/applications?company=nomatchxyz');
 
-    expect(await screen.findByText('No applications match these filters.')).toBeInTheDocument();
+    expect(await screen.findByText('No applications match this view.')).toBeInTheDocument();
     expect(
       screen.queryByRole('link', { name: 'Add your first application' }),
     ).not.toBeInTheDocument();
+  });
+
+  it('shows the narrowed empty copy — not the first-run CTA — on an out-of-range page', async () => {
+    await seedSession();
+    // 4 seeded rows, pageSize 2 → page 3 is out of range and comes back empty
+    renderPage('/applications?pageSize=2&page=3');
+
+    expect(await screen.findByText('No applications match this view.')).toBeInTheDocument();
+    expect(
+      screen.queryByRole('link', { name: 'Add your first application' }),
+    ).not.toBeInTheDocument();
+    // the pager is still there so the user can get back
+    expect(screen.getByRole('button', { name: 'Previous' })).toBeEnabled();
   });
 
   it('pages through the list', async () => {

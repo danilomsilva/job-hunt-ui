@@ -46,4 +46,20 @@ describe('ListControls', () => {
       { timeout: 1000 },
     );
   });
+
+  it('adopts a company value that changed in the URL and does not push it back', async () => {
+    const onFilter = vi.fn();
+    const { rerender } = render(
+      <ListControls params={{ company: 'globex' }} onFilter={onFilter} />,
+    );
+    expect(screen.getByLabelText('Company')).toHaveValue('globex');
+
+    // e.g. the Back button drops the company filter from the URL
+    rerender(<ListControls params={{}} onFilter={onFilter} />);
+
+    expect(screen.getByLabelText('Company')).toHaveValue('');
+    // give the debounce a chance to (wrongly) re-push the stale value
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    expect(onFilter).not.toHaveBeenCalledWith({ company: 'globex' });
+  });
 });

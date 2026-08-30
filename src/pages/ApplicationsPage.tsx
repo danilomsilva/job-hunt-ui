@@ -13,7 +13,10 @@ export function ApplicationsPage() {
   const { applications, pagination, status, error, reload } = useApplications(params);
   useDocumentTitle('Applications');
 
-  const filtersActive = params.status !== undefined || params.company !== undefined;
+  // A narrowed view — a filter is set, or we're past page 1. Used to pick the
+  // right empty-state copy (never the "add your first" CTA for these).
+  const narrowedView =
+    params.status !== undefined || params.company !== undefined || (params.page ?? 1) > 1;
 
   return (
     <PageLayout>
@@ -50,11 +53,11 @@ export function ApplicationsPage() {
         </div>
       )}
 
-      {status === 'success' && applications.length === 0 && filtersActive && (
-        <p className="mt-4 text-sm text-slate-500">No applications match these filters.</p>
+      {status === 'success' && applications.length === 0 && narrowedView && (
+        <p className="mt-4 text-sm text-slate-500">No applications match this view.</p>
       )}
 
-      {status === 'success' && applications.length === 0 && !filtersActive && (
+      {status === 'success' && applications.length === 0 && !narrowedView && (
         <div className="mt-4 text-sm text-slate-500">
           <p>No applications yet.</p>
           <Link
@@ -67,39 +70,40 @@ export function ApplicationsPage() {
       )}
 
       {status === 'success' && applications.length > 0 && (
-        <>
-          <table className="mt-4 w-full border-collapse text-left text-sm">
-            <thead>
-              <tr className="border-b border-slate-200 text-slate-500">
-                <th className="py-2 pr-4 font-medium">Company</th>
-                <th className="py-2 pr-4 font-medium">Role</th>
-                <th className="py-2 pr-4 font-medium">Status</th>
-                <th className="py-2 font-medium">Applied</th>
+        <table className="mt-4 w-full border-collapse text-left text-sm">
+          <thead>
+            <tr className="border-b border-slate-200 text-slate-500">
+              <th className="py-2 pr-4 font-medium">Company</th>
+              <th className="py-2 pr-4 font-medium">Role</th>
+              <th className="py-2 pr-4 font-medium">Status</th>
+              <th className="py-2 font-medium">Applied</th>
+            </tr>
+          </thead>
+          <tbody>
+            {applications.map((application) => (
+              <tr key={application.id} className="border-b border-slate-100">
+                <td className="py-2 pr-4">
+                  <Link
+                    to={`/applications/${application.id}`}
+                    className="font-medium text-slate-900 underline"
+                  >
+                    {application.company}
+                  </Link>
+                </td>
+                <td className="py-2 pr-4 text-slate-600">{application.role}</td>
+                <td className="py-2 pr-4">
+                  <StatusBadge status={application.status} />
+                </td>
+                <td className="py-2 text-slate-600">{formatAppliedAt(application.appliedAt)}</td>
               </tr>
-            </thead>
-            <tbody>
-              {applications.map((application) => (
-                <tr key={application.id} className="border-b border-slate-100">
-                  <td className="py-2 pr-4">
-                    <Link
-                      to={`/applications/${application.id}`}
-                      className="font-medium text-slate-900 underline"
-                    >
-                      {application.company}
-                    </Link>
-                  </td>
-                  <td className="py-2 pr-4 text-slate-600">{application.role}</td>
-                  <td className="py-2 pr-4">
-                    <StatusBadge status={application.status} />
-                  </td>
-                  <td className="py-2 text-slate-600">{formatAppliedAt(application.appliedAt)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <Pagination pagination={pagination} onPageChange={setPage} />
-        </>
+            ))}
+          </tbody>
+        </table>
       )}
+
+      {/* Rendered whenever there's more than one page — including an out-of-range
+          page that came back empty, so the user can navigate back. */}
+      {status === 'success' && <Pagination pagination={pagination} onPageChange={setPage} />}
     </PageLayout>
   );
 }

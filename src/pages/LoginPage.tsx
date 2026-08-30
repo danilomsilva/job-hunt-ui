@@ -9,8 +9,11 @@ export function LoginPage() {
   const location = useLocation();
   useDocumentTitle('Log in');
 
-  const redirectState = location.state as { from?: { pathname?: string } } | null;
-  const redirectTo = redirectState?.from?.pathname ?? '/applications';
+  // ProtectedRoute stashes the full location it bounced from; keep its query
+  // string so a deep link like /applications?status=interview&page=2 survives login.
+  const from = (location.state as { from?: { pathname?: string; search?: string } } | null)?.from;
+  const redirectTo =
+    from?.pathname !== undefined ? `${from.pathname}${from.search ?? ''}` : '/applications';
 
   if (status === 'authenticated') {
     return <Navigate to={redirectTo} replace />;

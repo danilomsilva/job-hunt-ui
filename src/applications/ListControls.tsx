@@ -22,14 +22,28 @@ interface ListControlsProps {
 const field = 'rounded border border-slate-300 px-2 py-1 text-sm';
 
 export function ListControls({ params, onFilter }: ListControlsProps) {
-  const [company, setCompany] = useState(params.company ?? '');
+  const urlCompany = params.company ?? '';
+  const [company, setCompany] = useState(urlCompany);
+  const [lastUrlCompany, setLastUrlCompany] = useState(urlCompany);
   const debouncedCompany = useDebouncedValue(company, 300);
 
+  // The company box is a local typing buffer synced both ways with the URL.
+  // When the URL's company changes for a reason other than our own debounced
+  // push (back/forward, a shared link), adopt it into the input. Done during
+  // render — the React "adjust state on prop change" pattern, not in an effect.
+  if (urlCompany !== lastUrlCompany) {
+    setLastUrlCompany(urlCompany);
+    if (urlCompany !== debouncedCompany) setCompany(urlCompany);
+  }
+
+  // The other direction: once the user stops typing, commit to the URL. The
+  // `debouncedCompany === company` guard means we only push a *settled* input,
+  // so adopting a URL value above never bounces straight back out.
   useEffect(() => {
-    if (debouncedCompany !== (params.company ?? '')) {
+    if (debouncedCompany === company && debouncedCompany !== urlCompany) {
       onFilter({ company: debouncedCompany });
     }
-  }, [debouncedCompany, params.company, onFilter]);
+  }, [debouncedCompany, company, urlCompany, onFilter]);
 
   const sortOrder = params.sortOrder ?? 'desc';
 

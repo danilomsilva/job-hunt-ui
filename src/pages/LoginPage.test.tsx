@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { describe, expect, it } from 'vitest';
 import { AuthProvider } from '../auth/AuthProvider';
 import { saveSession } from '../lib/tokens';
@@ -69,5 +69,36 @@ describe('LoginPage', () => {
     renderLogin();
 
     expect(await screen.findByText('applications page')).toBeInTheDocument();
+  });
+
+  it('preserves the query string of the page it was bounced from', async () => {
+    function AppsProbe() {
+      const location = useLocation();
+      return <p>apps {location.search}</p>;
+    }
+
+    render(
+      <MemoryRouter
+        initialEntries={[
+          {
+            pathname: '/login',
+            state: { from: { pathname: '/applications', search: '?status=interview&page=2' } },
+          },
+        ]}
+      >
+        <AuthProvider>
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/applications" element={<AppsProbe />} />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    await userEvent.type(screen.getByLabelText('Email'), 'ada@example.com');
+    await userEvent.type(screen.getByLabelText('Password'), 'password123');
+    await userEvent.click(screen.getByRole('button', { name: 'Log in' }));
+
+    expect(await screen.findByText('apps ?status=interview&page=2')).toBeInTheDocument();
   });
 });

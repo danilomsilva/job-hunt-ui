@@ -39,6 +39,7 @@ export function useListParams(): ListParamsApi {
   const params = useMemo<ListApplicationsParams>(() => {
     const statusRaw = searchParams.get('status');
     const sortByRaw = searchParams.get('sortBy');
+    const sortOrderRaw = searchParams.get('sortOrder');
     const company = searchParams.get('company') ?? '';
     const pageRaw = Number(searchParams.get('page'));
     const pageSizeRaw = Number(searchParams.get('pageSize'));
@@ -47,7 +48,7 @@ export function useListParams(): ListParamsApi {
       status: isStatus(statusRaw) ? statusRaw : undefined,
       company: company.length > 0 ? company : undefined,
       sortBy: isSort(sortByRaw) ? sortByRaw : undefined,
-      sortOrder: searchParams.get('sortOrder') === 'asc' ? 'asc' : undefined,
+      sortOrder: sortOrderRaw === 'asc' || sortOrderRaw === 'desc' ? sortOrderRaw : undefined,
       page: Number.isInteger(pageRaw) && pageRaw > 1 ? pageRaw : undefined,
       // No UI control for pageSize (fixed at the API default), but an explicit
       // ?pageSize=… in the URL is still honoured.

@@ -22,6 +22,18 @@ export function useApplication(id: string): UseApplication {
   const [status, setStatus] = useState<Status>('loading');
   const [error, setError] = useState<string | null>(null);
   const [nonce, setNonce] = useState(0);
+  const [trackedId, setTrackedId] = useState(id);
+
+  // When the id changes, drop the previous application's data synchronously so
+  // callers never render (or submit an edit prefilled from) a stale record while
+  // the new fetch is in flight. This is the "adjust state on prop change during
+  // render" pattern — not a `setState` inside an effect.
+  if (id !== trackedId) {
+    setTrackedId(id);
+    setApplication(null);
+    setStatus('loading');
+    setError(null);
+  }
 
   const reload = useCallback(() => {
     setStatus('loading');

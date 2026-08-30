@@ -21,12 +21,15 @@ async function authenticate(): Promise<string> {
   return accessToken;
 }
 
-async function firstApplicationId(accessToken: string): Promise<string> {
+async function seededApplications(accessToken: string): Promise<{ id: string; company: string }[]> {
   const res = await fetch(`${API_URL}/applications`, {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
-  const body = (await res.json()) as { data: { id: string }[] };
-  const first = body.data[0];
+  return ((await res.json()) as { data: { id: string; company: string }[] }).data;
+}
+
+async function firstApplicationId(accessToken: string): Promise<string> {
+  const first = (await seededApplications(accessToken))[0];
   if (!first) throw new Error('expected seeded applications');
   return first.id;
 }
@@ -109,6 +112,27 @@ describe('useApplication', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('company')).toHaveTextContent('Reloaded');
+    });
+  });
+
+  it('drops the previous application immediately when the id changes', async () => {
+    const token = await authenticate();
+    const [a, b] = await seededApplications(token);
+    if (!a || !b) throw new Error('expected at least two seeded applications');
+
+    const { rerender } = render(<Harness id={a.id} />);
+    await waitFor(() => {
+      expect(screen.getByTestId('company')).toHaveTextContent(a.company);
+    });
+
+    rerender(<Harness id={b.id} />);
+
+    // no stale data from `a` while `b` is in flight
+    expect(screen.getByTestId('status')).toHaveTextContent('loading');
+    expect(screen.getByTestId('company')).toHaveTextContent('none');
+
+    await waitFor(() => {
+      expect(screen.getByTestId('company')).toHaveTextContent(b.company);
     });
   });
 });
