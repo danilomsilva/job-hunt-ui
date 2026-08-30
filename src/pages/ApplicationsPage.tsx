@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { formatAppliedAt } from '../applications/formatStatus';
 import { ListControls } from '../applications/ListControls';
@@ -13,10 +14,20 @@ export function ApplicationsPage() {
   const { applications, pagination, status, error, reload } = useApplications(params);
   useDocumentTitle('Applications');
 
+  // If the URL asks for a page past the end (bookmark, shrunk result set),
+  // snap to the last real page instead of leaving the user on an empty screen.
+  const currentPage = params.page ?? 1;
+  useEffect(() => {
+    if (status === 'success' && pagination !== null) {
+      const lastPage = Math.max(pagination.totalPages, 1);
+      if (currentPage > lastPage) setPage(lastPage);
+    }
+  }, [status, pagination, currentPage, setPage]);
+
   // A narrowed view — a filter is set, or we're past page 1. Used to pick the
   // right empty-state copy (never the "add your first" CTA for these).
   const narrowedView =
-    params.status !== undefined || params.company !== undefined || (params.page ?? 1) > 1;
+    params.status !== undefined || params.company !== undefined || currentPage > 1;
 
   return (
     <PageLayout>

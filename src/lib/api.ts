@@ -4,7 +4,7 @@
  * refreshes the access token once and retries the request.
  */
 import { clearSession, getAccessToken, loadSession, saveSession, setAccessToken } from './tokens';
-import type { ApiErrorBody, TokenPair } from './types';
+import type { TokenPair } from './types';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -71,25 +71,34 @@ async function request<T>(path: string, options: RequestOptions, isRetry: boolea
 }
 
 async function toApiError(response: Response): Promise<ApiError> {
-  let parsed: ApiErrorBody | undefined;
+  let body: unknown;
   try {
-    parsed = (await response.json()) as ApiErrorBody;
+    body = await response.json();
   } catch {
     // A non-JSON body (or none) — fall through to a generic message.
   }
-  if (parsed !== undefined) {
+
+  const fallback = `Request failed with status ${String(response.status)}`;
+
+  // Only trust the standard `{ error: { code, message } }` envelope; a bare
+  // `null`, `{}`, or a proxy's own shape falls back rather than throwing.
+  if (
+    typeof body === 'object' &&
+    body !== null &&
+    'error' in body &&
+    typeof body.error === 'object' &&
+    body.error !== null
+  ) {
+    const error = body.error as { code?: unknown; message?: unknown; details?: unknown };
     return new ApiError(
       response.status,
-      parsed.error.code,
-      parsed.error.message,
-      parsed.error.details,
+      typeof error.code === 'string' ? error.code : 'UNKNOWN',
+      typeof error.message === 'string' ? error.message : fallback,
+      error.details,
     );
   }
-  return new ApiError(
-    response.status,
-    'UNKNOWN',
-    `Request failed with status ${String(response.status)}`,
-  );
+
+  return new ApiError(response.status, 'UNKNOWN', fallback);
 }
 
 // One shared refresh so concurrent 401s don't fire N parallel refreshes.
@@ -105,25 +114,32 @@ async function refreshAccessToken(): Promise<boolean> {
 async function runRefresh(): Promise<boolean> {
   const session = loadSession();
   if (session === null) return false;
+  const startedWith = session.refreshToken;
+
+  // Only touch the stored session if it's still the one we set out to refresh —
+  // a concurrent login (or another refresh) may have replaced it while this
+  // request was in flight, and we must not clobber the newer session.
+  const stillOurs = () => loadSession()?.refreshToken === startedWith;
 
   try {
     const response = await fetch(`${API_URL}/auth/refresh`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refreshToken: session.refreshToken }),
+      body: JSON.stringify({ refreshToken: startedWith }),
     });
 
     if (!response.ok) {
-      endSession();
+      if (stillOurs()) endSession();
       return false;
     }
 
     const tokens = (await response.json()) as TokenPair;
+    if (!stillOurs()) return true; // superseded — the newer session stands
     setAccessToken(tokens.accessToken);
     saveSession({ refreshToken: tokens.refreshToken, email: session.email });
     return true;
   } catch {
-    endSession();
+    if (stillOurs()) endSession();
     return false;
   }
 }

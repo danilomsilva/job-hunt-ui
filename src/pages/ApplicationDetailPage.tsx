@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { deleteApplication } from '../applications/applicationsApi';
-import { formatSalary } from '../applications/formatApplication';
+import { formatSalary, isSafeHttpUrl } from '../applications/formatApplication';
 import { formatAppliedAt, STATUS_LABELS } from '../applications/formatStatus';
 import { StatusBadge } from '../applications/StatusBadge';
 import { useApplication } from '../applications/useApplication';
@@ -98,7 +98,7 @@ export function ApplicationDetailPage() {
           <dd className="text-slate-800">
             {application.jobUrl === null ? (
               '—'
-            ) : (
+            ) : isSafeHttpUrl(application.jobUrl) ? (
               <a
                 href={application.jobUrl}
                 target="_blank"
@@ -107,6 +107,8 @@ export function ApplicationDetailPage() {
               >
                 {application.jobUrl}
               </a>
+            ) : (
+              <span className="break-all">{application.jobUrl}</span>
             )}
           </dd>
 

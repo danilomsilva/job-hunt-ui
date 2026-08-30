@@ -12,3 +12,17 @@ export function formatSalary(
   if (max !== null) return `Up to ${amount(max)}${suffix}`;
   return '—';
 }
+
+/**
+ * Whether a stored value is safe to render as an `href` — http(s) only. Guards
+ * against `javascript:` / `data:` values that reached the DB by another route
+ * (a direct API call, older data) even though the form now rejects them.
+ */
+export function isSafeHttpUrl(value: string): boolean {
+  try {
+    const { protocol } = new URL(value);
+    return protocol === 'http:' || protocol === 'https:';
+  } catch {
+    return false;
+  }
+}

@@ -117,17 +117,26 @@ describe('ApplicationsPage', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('shows the narrowed empty copy — not the first-run CTA — on an out-of-range page', async () => {
+  it('snaps an out-of-range page back to the last real page (multi-page)', async () => {
     await seedSession();
-    // 4 seeded rows, pageSize 2 → page 3 is out of range and comes back empty
-    renderPage('/applications?pageSize=2&page=3');
+    // 4 seeded rows, pageSize 2 → 2 pages; page 5 is past the end
+    renderPage('/applications?pageSize=2&sortBy=company&sortOrder=asc&page=5');
 
-    expect(await screen.findByText('No applications match this view.')).toBeInTheDocument();
+    // corrected to page 2, showing the last two rows — not an empty screen
+    expect(await screen.findByText('Umbrella')).toBeInTheDocument();
+    expect(screen.getByText('Page 2 of 2')).toBeInTheDocument();
+  });
+
+  it('snaps an out-of-range page back when everything fits on one page', async () => {
+    await seedSession();
+    // 4 seeded rows, default pageSize 20 → 1 page; ?page=2 is a dead end without the snap
+    renderPage('/applications?page=2');
+
+    expect(await screen.findByText('Globex')).toBeInTheDocument();
+    expect(screen.getByText('Initech')).toBeInTheDocument();
     expect(
       screen.queryByRole('link', { name: 'Add your first application' }),
     ).not.toBeInTheDocument();
-    // the pager is still there so the user can get back
-    expect(screen.getByRole('button', { name: 'Previous' })).toBeEnabled();
   });
 
   it('pages through the list', async () => {

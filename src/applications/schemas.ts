@@ -78,8 +78,16 @@ const optionalInt = (label: string) =>
 const optionalUrl = z.string().transform((raw, ctx): string | null => {
   const trimmed = raw.trim();
   if (trimmed === '') return null;
-  if (!URL.canParse(trimmed)) {
-    ctx.addIssue({ code: 'custom', message: 'Enter a valid URL' });
+  // Restrict to http(s): `URL.canParse` also accepts javascript:/data:/etc.,
+  // and this value is later rendered as a clickable link.
+  let protocol: string | undefined;
+  try {
+    protocol = new URL(trimmed).protocol;
+  } catch {
+    protocol = undefined;
+  }
+  if (protocol !== 'http:' && protocol !== 'https:') {
+    ctx.addIssue({ code: 'custom', message: 'Enter a valid http(s) URL' });
     return z.NEVER;
   }
   return trimmed;

@@ -46,4 +46,19 @@ describe('ProtectedRoute', () => {
     renderAt('/secret');
     expect(await screen.findByText('secret page')).toBeInTheDocument();
   });
+
+  it('exposes a main landmark while the session check is running', async () => {
+    const res = await fetch(`${API_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'ada@example.com', password: 'password123' }),
+    });
+    const { refreshToken } = (await res.json()) as { refreshToken: string };
+    saveSession({ refreshToken, email: 'ada@example.com' });
+
+    renderAt('/secret');
+    // the loading state is a proper landmark, not a bare <p>
+    expect(screen.getByRole('main')).toHaveTextContent('Loading…');
+    await screen.findByText('secret page');
+  });
 });

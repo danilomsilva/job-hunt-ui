@@ -40,6 +40,24 @@ describe('apiFetch', () => {
     });
   });
 
+  it('still yields an ApiError when the error body is not the standard envelope', async () => {
+    server.use(
+      http.get(`${API_URL}/thing`, () => HttpResponse.json(null, { status: 502 })),
+      http.get(`${API_URL}/thing2`, () => HttpResponse.json({}, { status: 500 })),
+    );
+
+    await expect(apiFetch('/thing', { auth: false })).rejects.toMatchObject({
+      name: 'ApiError',
+      status: 502,
+      code: 'UNKNOWN',
+    });
+    await expect(apiFetch('/thing2', { auth: false })).rejects.toMatchObject({
+      name: 'ApiError',
+      status: 500,
+      code: 'UNKNOWN',
+    });
+  });
+
   it('refreshes the access token on a 401 and retries the request once', async () => {
     await seedSession();
     setAccessToken('stale-token');

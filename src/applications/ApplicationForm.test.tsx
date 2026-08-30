@@ -68,7 +68,17 @@ describe('ApplicationForm', () => {
     await userEvent.type(screen.getByLabelText('Job URL'), 'not a url');
     await userEvent.click(screen.getByRole('button', { name: 'Save' }));
 
-    expect(await screen.findByText('Enter a valid URL')).toBeInTheDocument();
+    expect(await screen.findByText('Enter a valid http(s) URL')).toBeInTheDocument();
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it('rejects a non-http(s) URL scheme', async () => {
+    const { onSubmit } = renderForm({ initialValues: { ...filled } });
+
+    await userEvent.type(screen.getByLabelText('Job URL'), 'javascript:alert(1)');
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+    expect(await screen.findByText('Enter a valid http(s) URL')).toBeInTheDocument();
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
