@@ -50,7 +50,7 @@ the backend it talks to.
 - **Accessibility** — a skip link, focus moves to `<main>` on every route
   change, per-page `<title>`, form errors wired to their inputs via
   `aria-describedby`, `lang="en-IE"`.
-- **94 tests** (Vitest + RTL + MSW), including an end-to-end flow test
+- **102 tests** (Vitest + RTL + MSW), including an end-to-end flow test
   (log in → create → edit → delete through the real `<App>`) and `axe` checks on
   every page. **No backend or Docker needed to run them.**
 
