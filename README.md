@@ -1,6 +1,8 @@
 # job-hunt-ui
 
-![CI](https://github.com/danilomsilva/job-hunt-ui/actions/workflows/ci.yml/badge.svg)
+[![CI](https://github.com/danilomsilva/job-hunt-ui/actions/workflows/ci.yml/badge.svg)](https://github.com/danilomsilva/job-hunt-ui/actions/workflows/ci.yml)
+![TypeScript strict](https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript&logoColor=white)
+![Tests](https://img.shields.io/badge/tests-102%20passing-brightgreen)
 
 A React + TypeScript client for [`job-hunt-api`](https://github.com/danilomsilva/job-hunt-api) —
 Phase 2 of the same learning roadmap. Auth with automatic token refresh, an
